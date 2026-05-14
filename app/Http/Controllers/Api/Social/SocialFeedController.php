@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Http\Controllers\Api\Social;
+
+use App\Http\Controllers\Controller;
+use App\Models\Announcement;
+use App\Models\Workshop;
+use App\Models\TutoringRequest;
+use App\Models\Community;
+use Illuminate\Http\Request;
+use App\Http\Resources\Social\WorkshopResource;
+use App\Http\Resources\Social\AnnouncementResource;
+use App\Http\Resources\Social\CommunityResource;
+
+class SocialFeedController extends Controller
+{
+    /**
+     * Display a unified feed of workshops and announcements.
+     */
+    public function index(Request $request)
+    {
+        $limit = $request->get('limit', 15);
+
+        $workshops = Workshop::where('status', 'approved')
+            ->with(['user', 'targetMajors', 'community'])
+            ->latest()
+            ->get();
+
+        $announcements = Announcement::where('status', 'approved')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->with(['community'])
+            ->latest()
+            ->get();
+
+        // Merge and sort
+        $merged = $workshops->map(function ($item) {
+            $item->feed_type = 'workshop';
+            return $item;
+        })->merge($announcements->map(function ($item) {
+            $item->feed_type = 'announcement';
+            return $item;
+        }))->sortByDesc('created_at')->values();
+
+        return response()->json([
+            'data' => $merged->map(function ($item) {
+                if ($item->feed_type === 'workshop') {
+                    return [
+                        'type' => 'workshop',
+                        'data' => new WorkshopResource($item),
+                        'created_at' => $item->created_at,
+                    ];
+                } else {
+                    return [
+                        'type' => 'announcement',
+                        'data' => new AnnouncementResource($item),
+                        'created_at' => $item->created_at,
+                    ];
+                }
+            })
+        ]);
+    }
+
+    /**
+     * Display a unified list of the user's own requests/submissions.
+     */
+    public function myRequests(Request $request)
+    {
+        $user = $request->user();
+
+        // 1. Tutoring Requests
+        $tutoringRequests = collect();
+        if ($user->student) {
+            $tutoringRequests = TutoringRequest::where('student_id', $user->student->id)
+                ->with('course:id,name,code')
+                ->latest()
+                ->get();
+        }
+
+        // 2. Workshops
+        $workshops = Workshop::where('user_id', $user->id)
+            ->with(['community', 'targetMajors'])
+            ->latest()
+            ->get();
+
+        // 3. Announcements
+        // Since announcements don't have a direct user_id (only community), 
+        // we might need to check if we should track the creator.
+        // For now, let's assume we want to show announcements created by this user if possible.
+        // Wait, does Announcement have a user_id? Let's check.
+        $announcements = Announcement::where('user_id', $user->id)
+            ->with(['community'])
+            ->latest()
+            ->get();
+
+        // 4. Communities
+        $communities = Community::where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        // Merge and sort
+        $merged = $tutoringRequests->map(function ($item) {
+            $item->feed_type = 'tutoring_request';
+            return $item;
+        })->merge($workshops->map(function ($item) {
+            $item->feed_type = 'workshop';
+            return $item;
+        }))->merge($announcements->map(function ($item) {
+            $item->feed_type = 'announcement';
+            return $item;
+        }))->merge($communities->map(function ($item) {
+            $item->feed_type = 'community';
+            return $item;
+        }))->sortByDesc('created_at')->values();
+
+        return response()->json([
+            'data' => $merged->map(function ($item) {
+                $type = $item->feed_type;
+                if ($type === 'workshop') {
+                    return [
+                        'type' => 'workshop',
+                        'data' => new WorkshopResource($item),
+                        'created_at' => $item->created_at,
+                    ];
+                } elseif ($type === 'announcement') {
+                    return [
+                        'type' => 'announcement',
+                        'data' => new AnnouncementResource($item),
+                        'created_at' => $item->created_at,
+                    ];
+                } elseif ($type === 'community') {
+                    return [
+                        'type' => 'community',
+                        'data' => new CommunityResource($item),
+                        'created_at' => $item->created_at,
+                    ];
+                } else {
+                    return [
+                        'type' => 'tutoring_request',
+                        'data' => $item, // Raw tutoring request for now
+                        'created_at' => $item->created_at,
+                    ];
+                }
+            })
+        ]);
+    }
+}

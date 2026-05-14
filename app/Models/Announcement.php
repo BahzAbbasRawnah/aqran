@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Announcement extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'community_id',
+        'title',
+        'content',
+        'image_url',
+        'publish_date',
+        'expires_at',
+        'status',
+        'reject_reason',
+    ];
+
+    protected $casts = [
+        'publish_date' => 'datetime',
+        'expires_at' => 'datetime',
+        'status' => \App\Enums\ContentStatus::class,
+    ];
+
+    /**
+     * Get the community that owns the announcement.
+     */
+    public function community(): BelongsTo
+    {
+        return $this->belongsTo(Community::class);
+    }
+}
