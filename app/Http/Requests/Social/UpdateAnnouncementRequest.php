@@ -22,7 +22,8 @@ class UpdateAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'community_id' => 'sometimes|exists:communities,id',
+            'major_ids' => 'sometimes|nullable|array',
+            'major_ids.*' => 'exists:majors,id',
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
             'publish_date' => 'sometimes|date',

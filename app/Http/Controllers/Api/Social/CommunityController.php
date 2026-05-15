@@ -19,7 +19,7 @@ class CommunityController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $communities = Community::where('status', ContentStatus::APPROVED)
-            ->with(['workshops', 'announcements'])
+            ->with(['major'])
             ->paginate(15);
         return CommunityResource::collection($communities);
     }
@@ -34,15 +34,12 @@ class CommunityController extends Controller
         $data['status'] = ContentStatus::PENDING;
         
         $community = Community::create($data);
-        return new CommunityResource($community);
+        return new CommunityResource($community->load('major'));
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Community $community): CommunityResource
     {
-        return new CommunityResource($community->load(['workshops', 'announcements', 'members']));
+        return new CommunityResource($community->load(['major', 'members']));
     }
 
     /**
@@ -51,7 +48,7 @@ class CommunityController extends Controller
     public function update(UpdateCommunityRequest $request, Community $community): CommunityResource
     {
         $community->update($request->validated());
-        return new CommunityResource($community);
+        return new CommunityResource($community->load('major'));
     }
 
     /**
@@ -78,7 +75,7 @@ class CommunityController extends Controller
             $community->members()->attach($user->id, ['joined_at' => now()]);
         });
 
-        return new CommunityResource($community->load(['workshops', 'announcements']));
+        return new CommunityResource($community->load(['major']));
     }
 
     /**
@@ -96,6 +93,6 @@ class CommunityController extends Controller
             $community->members()->detach($user->id);
         });
 
-        return new CommunityResource($community->load(['workshops', 'announcements']));
+        return new CommunityResource($community->load(['major']));
     }
 }

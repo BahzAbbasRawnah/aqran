@@ -22,7 +22,8 @@ class StoreAnnouncementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'community_id' => 'nullable|exists:communities,id',
+            'major_ids' => 'nullable|array',
+            'major_ids.*' => 'exists:majors,id',
             'title' => 'required|string|max:255',
             'content' => 'required|string|max:2000',
             'image' => 'required|image|max:10240', // 10MB max

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->boolean('is_completed')->default(false);
+            $table->string('grade')->nullable();
             $table->text('learning_details')->nullable(); // "How did you learn this course?"
             $table->string('curriculum_parts'); // e.g., "Full curriculum", "Half", etc.
             $table->string('video_url')->nullable();

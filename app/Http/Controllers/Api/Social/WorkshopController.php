@@ -19,7 +19,7 @@ class WorkshopController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $workshops = Workshop::where('status', ContentStatus::APPROVED)
-            ->with(['community', 'major'])
+            ->with(['user', 'targetMajors'])
             ->paginate(15);
         return WorkshopResource::collection($workshops);
     }
@@ -45,10 +45,10 @@ class WorkshopController extends Controller
         $workshop = Workshop::create($data);
 
         if ($request->has('target_major_ids')) {
-            $workshop->targetMajors()->attach($request->target_major_ids);
+            $workshop->targetMajors()->sync($request->target_major_ids);
         }
 
-        return new WorkshopResource($workshop->load(['user', 'community', 'targetMajors']));
+        return new WorkshopResource($workshop->load(['user', 'targetMajors']));
     }
 
     /**
@@ -56,7 +56,7 @@ class WorkshopController extends Controller
      */
     public function show(Workshop $workshop): WorkshopResource
     {
-        return new WorkshopResource($workshop->load(['community', 'major']));
+        return new WorkshopResource($workshop->load(['user', 'targetMajors']));
     }
 
     /**
@@ -65,7 +65,12 @@ class WorkshopController extends Controller
     public function update(UpdateWorkshopRequest $request, Workshop $workshop): WorkshopResource
     {
         $workshop->update($request->validated());
-        return new WorkshopResource($workshop);
+        
+        if ($request->has('target_major_ids')) {
+            $workshop->targetMajors()->sync($request->target_major_ids);
+        }
+        
+        return new WorkshopResource($workshop->load(['user', 'targetMajors']));
     }
 
     /**

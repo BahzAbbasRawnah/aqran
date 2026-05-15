@@ -23,6 +23,7 @@ class UpdateCommunityRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
+            'major_id' => 'sometimes|nullable|exists:majors,id',
             'description' => 'sometimes|nullable|string',
             'cover_image' => 'sometimes|nullable|string|max:255',
             'member_count' => 'sometimes|integer|min:0',

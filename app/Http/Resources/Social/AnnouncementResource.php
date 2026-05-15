@@ -16,7 +16,6 @@ class AnnouncementResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'community_id' => $this->community_id,
             'title' => $this->title,
             'content' => $this->content,
             'image_url' => $this->image_url,
@@ -26,9 +25,10 @@ class AnnouncementResource extends JsonResource
             'reject_reason' => $this->reject_reason,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_general' => $this->majors->isEmpty(),
             
             // Relationships
-            'community' => new CommunityResource($this->whenLoaded('community')),
+            'majors' => \App\Http\Resources\Academics\MajorResource::collection($this->whenLoaded('majors')),
         ];
     }
 }

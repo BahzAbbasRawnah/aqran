@@ -34,13 +34,13 @@ class AnnouncementResource extends Resource
                         ->maxLength(255)
                         ->columnSpanFull(),
 
-                    Forms\Components\Select::make('community_id')
-                        ->label('المجتمع المرتبط')
-                        ->relationship('community', 'name')
+                    Forms\Components\Select::make('majors')
+                        ->label('التخصصات المستهدفة')
+                        ->relationship('majors', 'name')
+                        ->multiple()
                         ->searchable()
                         ->preload()
-                        ->nullable()
-                        ->placeholder('إعلان عام (بدون مجتمع)'),
+                        ->placeholder('إعلان عام (لجميع التخصصات)'),
 
                     Forms\Components\Select::make('status')
                         ->label('الحالة')
@@ -87,10 +87,8 @@ class AnnouncementResource extends Resource
                     ->sortable()
                     ->limit(40),
 
-                Tables\Columns\TextColumn::make('community.name')
-                    ->label('المجتمع')
-                    ->searchable()
-                    ->sortable()
+                Tables\Columns\TextColumn::make('majors.name')
+                    ->label('التخصصات')
                     ->badge()
                     ->color('primary')
                     ->default('عام'),
@@ -126,9 +124,10 @@ class AnnouncementResource extends Resource
                         'approved' => 'منشور',
                         'rejected' => 'مرفوض',
                     ]),
-                Tables\Filters\SelectFilter::make('community_id')
-                    ->label('تصفية حسب المجتمع')
-                    ->relationship('community', 'name'),
+                Tables\Filters\SelectFilter::make('majors')
+                    ->label('تصفية حسب التخصص')
+                    ->relationship('majors', 'name')
+                    ->multiple(),
             ])
             ->actions([
                 // Quick Approve Action

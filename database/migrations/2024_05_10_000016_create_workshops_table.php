@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('workshops', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('community_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('description', 500); // Increased length as per project files logic
             $table->string('video_url');

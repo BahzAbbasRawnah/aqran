@@ -22,7 +22,6 @@ class StoreWorkshopRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'community_id' => 'nullable|exists:communities,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'video' => 'required|file|mimes:mp4,mov,avi,wmv|max:51200', // 50MB max for now

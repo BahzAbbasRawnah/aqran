@@ -22,8 +22,8 @@ class UpdateWorkshopRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'community_id' => 'sometimes|exists:communities,id',
-            'major_id' => 'sometimes|nullable|exists:majors,id',
+            'target_major_ids' => 'sometimes|nullable|array',
+            'target_major_ids.*' => 'exists:majors,id',
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|nullable|string',
             'date' => 'sometimes|date',

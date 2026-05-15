@@ -12,6 +12,7 @@ class Community extends Model
 
     protected $fillable = [
         'user_id',
+        'major_id',
         'name',
         'description',
         'category',
@@ -31,6 +32,11 @@ class Community extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function major(): BelongsTo
+    {
+        return $this->belongsTo(Major::class);
     }
 
     /**

@@ -18,6 +18,7 @@ class TutoringRequestController extends Controller
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'is_completed' => 'required|boolean',
+            'grade' => 'required_if:is_completed,1|nullable|in:A+,A,B+,B,C+,C',
             'learning_details' => 'required_if:is_completed,0|string|nullable',
             'curriculum_parts' => 'required|string',
             'demo_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:51200', // max 50MB

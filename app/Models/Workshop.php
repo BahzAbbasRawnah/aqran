@@ -12,7 +12,6 @@ class Workshop extends Model
 
     protected $fillable = [
         'user_id',
-        'community_id',
         'title',
         'description',
         'video_url',
@@ -34,14 +33,6 @@ class Workshop extends Model
     public function targetMajors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Major::class, 'workshop_majors');
-    }
-
-    /**
-     * Get the community this workshop belongs to.
-     */
-    public function community(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Community::class);
     }
 
     /**

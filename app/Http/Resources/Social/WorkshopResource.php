@@ -18,7 +18,6 @@ class WorkshopResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'community_id' => $this->community_id,
             'title' => $this->title,
             'description' => $this->description,
             'video_url' => $this->video_url,
@@ -27,10 +26,10 @@ class WorkshopResource extends JsonResource
             'reject_reason' => $this->reject_reason,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_general' => $this->targetMajors->isEmpty(),
             
             // Relationships
             'user' => new \App\Http\Resources\Auth\UserResource($this->whenLoaded('user')),
-            'community' => new CommunityResource($this->whenLoaded('community')),
             'target_majors' => MajorResource::collection($this->whenLoaded('targetMajors')),
         ];
     }

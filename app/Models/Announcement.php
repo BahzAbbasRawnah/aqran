@@ -12,7 +12,6 @@ class Announcement extends Model
 
     protected $fillable = [
         'user_id',
-        'community_id',
         'title',
         'content',
         'image_url',
@@ -37,10 +36,10 @@ class Announcement extends Model
     }
 
     /**
-     * Get the community that owns the announcement.
+     * Get the majors that this announcement targets.
      */
-    public function community(): BelongsTo
+    public function majors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(Community::class);
+        return $this->belongsToMany(Major::class, 'announcement_majors');
     }
 }

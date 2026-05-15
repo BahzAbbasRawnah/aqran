@@ -20,9 +20,18 @@ class SocialFeedController extends Controller
     public function index(Request $request)
     {
         $limit = $request->get('limit', 15);
+        $userMajorId = $request->user()?->student?->major_id;
 
         $workshops = Workshop::where('status', 'approved')
-            ->with(['user', 'targetMajors', 'community'])
+            ->where(function ($query) use ($userMajorId) {
+                $query->doesntHave('targetMajors')
+                    ->when($userMajorId, function ($q) use ($userMajorId) {
+                        $q->orWhereHas('targetMajors', function ($q) use ($userMajorId) {
+                            $q->where('majors.id', $userMajorId);
+                        });
+                    });
+            })
+            ->with(['user', 'targetMajors'])
             ->latest()
             ->get();
 
@@ -31,7 +40,15 @@ class SocialFeedController extends Controller
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             })
-            ->with(['community'])
+            ->where(function ($query) use ($userMajorId) {
+                $query->doesntHave('majors')
+                    ->when($userMajorId, function ($q) use ($userMajorId) {
+                        $q->orWhereHas('majors', function ($q) use ($userMajorId) {
+                            $q->where('majors.id', $userMajorId);
+                        });
+                    });
+            })
+            ->with(['majors'])
             ->latest()
             ->get();
 
@@ -81,18 +98,19 @@ class SocialFeedController extends Controller
 
         // 2. Workshops
         $workshops = Workshop::where('user_id', $user->id)
-            ->with(['community', 'targetMajors'])
+            ->with(['targetMajors'])
             ->latest()
             ->get();
 
         // 3. Announcements
         $announcements = Announcement::where('user_id', $user->id)
-            ->with(['community'])
+            ->with(['majors'])
             ->latest()
             ->get();
 
         // 4. Communities
         $communities = Community::where('user_id', $user->id)
+            ->with(['major'])
             ->latest()
             ->get();
 

@@ -19,7 +19,7 @@ class AnnouncementController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $announcements = Announcement::where('status', ContentStatus::APPROVED)
-            ->with(['community'])
+            ->with(['majors'])
             ->paginate(15);
         return AnnouncementResource::collection($announcements);
     }
@@ -40,8 +40,12 @@ class AnnouncementController extends Controller
         $data['status'] = ContentStatus::PENDING;
 
         $announcement = Announcement::create($data);
+        
+        if ($request->has('major_ids')) {
+            $announcement->majors()->sync($request->major_ids);
+        }
 
-        return new AnnouncementResource($announcement->load(['community']));
+        return new AnnouncementResource($announcement->load(['majors']));
     }
 
     /**
@@ -49,7 +53,7 @@ class AnnouncementController extends Controller
      */
     public function show(Announcement $announcement): AnnouncementResource
     {
-        return new AnnouncementResource($announcement->load(['community']));
+        return new AnnouncementResource($announcement->load(['majors']));
     }
 
     /**
@@ -58,7 +62,12 @@ class AnnouncementController extends Controller
     public function update(UpdateAnnouncementRequest $request, Announcement $announcement): AnnouncementResource
     {
         $announcement->update($request->validated());
-        return new AnnouncementResource($announcement);
+        
+        if ($request->has('major_ids')) {
+            $announcement->majors()->sync($request->major_ids);
+        }
+        
+        return new AnnouncementResource($announcement->load(['majors']));
     }
 
     /**

@@ -44,13 +44,13 @@ class WorkshopResource extends Resource
                             fn ($record) => "{$record->first_name} {$record->last_name} ({$record->email})"
                         ),
 
-                    Forms\Components\Select::make('community_id')
-                        ->label('المجتمع المرتبط')
-                        ->relationship('community', 'name')
+                    Forms\Components\Select::make('targetMajors')
+                        ->label('التخصصات المستهدفة')
+                        ->relationship('targetMajors', 'name')
+                        ->multiple()
                         ->searchable()
                         ->preload()
-                        ->nullable()
-                        ->placeholder('ورشة عامة (بدون مجتمع)'),
+                        ->placeholder('لجميع التخصصات (عام)'),
 
                     Forms\Components\Select::make('target_audience_major_id')
                         ->label('التخصص المستهدف')
@@ -108,13 +108,11 @@ class WorkshopResource extends Resource
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('community.name')
-                    ->label('المجتمع')
-                    ->searchable()
-                    ->sortable()
+                Tables\Columns\TextColumn::make('targetMajors.name')
+                    ->label('التخصصات المستهدفة')
                     ->badge()
-                    ->color('info')
-                    ->default('عام'),
+                    ->color('success')
+                    ->default('عام للجميع'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
@@ -136,9 +134,10 @@ class WorkshopResource extends Resource
                         'approved' => 'مقبولة',
                         'rejected' => 'مرفوضة',
                     ]),
-                Tables\Filters\SelectFilter::make('community_id')
-                    ->label('تصفية حسب المجتمع')
-                    ->relationship('community', 'name'),
+                Tables\Filters\SelectFilter::make('targetMajors')
+                    ->label('تصفية حسب التخصص')
+                    ->relationship('targetMajors', 'name')
+                    ->multiple(),
             ])
             ->actions([
                 // Quick Approve Action

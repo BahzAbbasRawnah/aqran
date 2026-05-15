@@ -23,6 +23,7 @@ class StoreCommunityRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'major_id' => 'nullable|exists:majors,id',
             'description' => 'nullable|string',
             'cover_image' => 'nullable|string|max:255',
             'member_count' => 'sometimes|integer|min:0',

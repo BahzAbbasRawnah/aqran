@@ -37,6 +37,13 @@ class CommunityResource extends Resource
                         ->label('الفئة')
                         ->maxLength(100)
                         ->placeholder('مثال: برمجة، شبكات، ذكاء اصطناعي'),
+                    Forms\Components\Select::make('major_id')
+                        ->label('التخصص المرتبط')
+                        ->relationship('major', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->placeholder('مجتمع عام (لكافة التخصصات)'),
                     Forms\Components\TextInput::make('join_link')
                         ->label('رابط الانضمام')
                         ->url()
@@ -78,6 +85,11 @@ class CommunityResource extends Resource
                     ->label('الفئة')
                     ->badge()
                     ->color('primary'),
+                Tables\Columns\TextColumn::make('major.name')
+                    ->label('التخصص')
+                    ->badge()
+                    ->color('info')
+                    ->default('عام'),
                 Tables\Columns\TextColumn::make('members_count')
                     ->counts('members')
                     ->label('الأعضاء')

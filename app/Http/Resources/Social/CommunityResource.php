@@ -17,6 +17,7 @@ class CommunityResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'major_id' => $this->major_id,
             'name' => $this->name,
             'description' => $this->description,
             'category' => $this->category,
@@ -28,8 +29,7 @@ class CommunityResource extends JsonResource
             'updated_at' => $this->updated_at,
             
             // Relationships
-            'workshops' => WorkshopResource::collection($this->whenLoaded('workshops')),
-            'announcements' => AnnouncementResource::collection($this->whenLoaded('announcements')),
+            'major' => new \App\Http\Resources\Academics\MajorResource($this->whenLoaded('major')),
             'members' => UserResource::collection($this->whenLoaded('members')),
             'members_count' => $this->members()->count(),
         ];

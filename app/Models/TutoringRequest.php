@@ -15,6 +15,7 @@ class TutoringRequest extends Model
         'student_id',
         'course_id',
         'is_completed',
+        'grade',
         'learning_details',
         'curriculum_parts',
         'video_url',      // Canonical column name (matches DB schema)

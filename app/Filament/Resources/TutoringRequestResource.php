@@ -48,6 +48,14 @@ class TutoringRequestResource extends Resource
                         ->badge(),
                     Infolists\Components\TextEntry::make('curriculum_parts')
                         ->label('أجزاء المنهج'),
+                    Infolists\Components\IconEntry::make('is_completed')
+                        ->label('هل أكمل المقرر؟')
+                        ->boolean(),
+                    Infolists\Components\TextEntry::make('grade')
+                        ->label('الدرجة')
+                        ->badge()
+                        ->color('success')
+                        ->visible(fn ($record) => $record->is_completed),
                 ])->columns(2),
 
             Infolists\Components\Section::make('تفاصيل الطلب')
@@ -88,6 +96,17 @@ class TutoringRequestResource extends Resource
                 Tables\Columns\TextColumn::make('curriculum_parts')
                     ->label('أجزاء المنهج')
                     ->limit(30)
+                    ->toggleable(),
+ 
+                Tables\Columns\IconColumn::make('is_completed')
+                    ->label('مكتمل')
+                    ->boolean()
+                    ->toggleable(),
+ 
+                Tables\Columns\TextColumn::make('grade')
+                    ->label('الدرجة')
+                    ->badge()
+                    ->color('success')
                     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('status')
