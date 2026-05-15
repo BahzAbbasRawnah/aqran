@@ -86,10 +86,6 @@ class SocialFeedController extends Controller
             ->get();
 
         // 3. Announcements
-        // Since announcements don't have a direct user_id (only community), 
-        // we might need to check if we should track the creator.
-        // For now, let's assume we want to show announcements created by this user if possible.
-        // Wait, does Announcement have a user_id? Let's check.
         $announcements = Announcement::where('user_id', $user->id)
             ->with(['community'])
             ->latest()

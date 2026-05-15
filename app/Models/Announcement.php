@@ -11,6 +11,7 @@ class Announcement extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'community_id',
         'title',
         'content',
@@ -26,6 +27,14 @@ class Announcement extends Model
         'expires_at' => 'datetime',
         'status' => \App\Enums\ContentStatus::class,
     ];
+
+    /**
+     * Get the user that created the announcement.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the community that owns the announcement.

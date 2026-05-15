@@ -11,6 +11,7 @@ class Community extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'name',
         'description',
         'category',
@@ -23,6 +24,14 @@ class Community extends Model
     protected $casts = [
         'status' => \App\Enums\ContentStatus::class,
     ];
+
+    /**
+     * Get the user that created the community.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * The members that belong to the community.

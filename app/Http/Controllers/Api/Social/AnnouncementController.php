@@ -35,6 +35,7 @@ class AnnouncementController extends Controller
             $data['image_url'] = $request->file('image')->store('announcements/images', 'public');
         }
 
+        $data['user_id'] = auth()->id();
         $data['publish_date'] = now();
         $data['status'] = ContentStatus::PENDING;
 

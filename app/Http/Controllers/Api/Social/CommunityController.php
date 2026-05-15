@@ -30,6 +30,7 @@ class CommunityController extends Controller
     public function store(StoreCommunityRequest $request): CommunityResource
     {
         $data = $request->validated();
+        $data['user_id'] = auth()->id();
         $data['status'] = ContentStatus::PENDING;
         
         $community = Community::create($data);
