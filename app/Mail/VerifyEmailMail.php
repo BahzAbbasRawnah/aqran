@@ -3,14 +3,12 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SendOtpMail extends Mailable
+class VerifyEmailMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,7 +18,7 @@ class SendOtpMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(string $code, string $name = 'User')
+    public function __construct(string $code, string $name = 'مستخدم')
     {
         $this->code = $code;
         $this->name = $name;
@@ -32,7 +30,7 @@ class SendOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Aqran Verification Code',
+            subject: 'توثيق حسابك في أقران | Verification Code',
         );
     }
 
@@ -42,14 +40,14 @@ class SendOtpMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.auth.otp',
+            view: 'emails.auth.verify',
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, Attachment>
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

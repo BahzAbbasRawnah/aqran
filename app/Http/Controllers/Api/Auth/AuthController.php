@@ -18,7 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SendOtpMail;
+use App\Mail\VerifyEmailMail;
+use App\Mail\ResetPasswordMail;
 use App\Mail\WelcomeMail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -90,7 +91,8 @@ class AuthController extends Controller
         );
 
         // Send OTP Email
-        Mail::to($userData->email)->send(new SendOtpMail($code, $userData->username));
+        // Send Verification Email
+        Mail::to($userData->email)->send(new VerifyEmailMail($code, $userData->first_name));
 
         return response()->json([
             'message' => 'Registration successful. Please verify your email.',
@@ -168,7 +170,7 @@ class AuthController extends Controller
         );
 
         $user = User::where('email', $request->email)->first();
-        Mail::to($request->email)->send(new SendOtpMail($code, $user->username));
+        Mail::to($request->email)->send(new ResetPasswordMail($code, $user->first_name));
 
         return response()->json([
             'message' => 'Reset code sent successfully.',
@@ -194,7 +196,8 @@ class AuthController extends Controller
         );
 
         $user = User::where('email', $request->email)->first();
-        Mail::to($request->email)->send(new SendOtpMail($code, $user?->username ?? 'User'));
+        // Default to VerifyEmailMail for resend as it's the primary registration flow
+        Mail::to($request->email)->send(new VerifyEmailMail($code, $user?->first_name ?? 'User'));
 
         return response()->json([
             'message' => 'OTP resent successfully.',
