@@ -56,7 +56,7 @@ class SocialFeedController extends Controller
         $merged = $workshops->map(function ($item) {
             $item->feed_type = 'workshop';
             return $item;
-        })->merge($announcements->map(function ($item) {
+        })->concat($announcements->map(function ($item) {
             $item->feed_type = 'announcement';
             return $item;
         }))->sortByDesc('created_at')->values();
@@ -118,13 +118,13 @@ class SocialFeedController extends Controller
         $merged = $tutoringRequests->map(function ($item) {
             $item->feed_type = 'tutoring_request';
             return $item;
-        })->merge($workshops->map(function ($item) {
+        })->concat($workshops->map(function ($item) {
             $item->feed_type = 'workshop';
             return $item;
-        }))->merge($announcements->map(function ($item) {
+        }))->concat($announcements->map(function ($item) {
             $item->feed_type = 'announcement';
             return $item;
-        }))->merge($communities->map(function ($item) {
+        }))->concat($communities->map(function ($item) {
             $item->feed_type = 'community';
             return $item;
         }))->sortByDesc('created_at')->values();
