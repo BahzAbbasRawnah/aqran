@@ -22,7 +22,7 @@ class CommunityResource extends JsonResource
             'description' => $this->description,
             'category' => $this->category,
             'join_link' => $this->join_link,
-            'cover_image' => $this->cover_image,
+            'cover_image' => $this->cover_image ? asset('storage/' . $this->cover_image) : null,
             'member_count' => $this->members_count ?? $this->members()->count(),
             'is_joined' => $request->user() ? $this->members()->where('user_id', $request->user()->id)->exists() : false,
             'status' => $this->status instanceof \BackedEnum ? $this->status->value : $this->status,

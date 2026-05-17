@@ -18,7 +18,7 @@ class AnnouncementResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'content' => $this->content,
-            'image_url' => $this->image_url,
+            'image_url' => $this->image_url ? asset('storage/' . $this->image_url) : null,
             'publish_date' => $this->publish_date,
             'expires_at' => $this->expires_at,
             'status' => $this->status,
