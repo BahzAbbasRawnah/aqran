@@ -163,31 +163,16 @@ class TutoringRequestResource extends Resource
                     ->color('success')
                     ->requiresConfirmation()
                     ->modalHeading('تأكيد قبول الطلب')
-                    ->modalDescription('هل تريد قبول هذا الطلب وإنشاء شرح تلقائياً؟')
+                    ->modalDescription('هل أنت متأكد من قبول هذا الطلب؟')
                     ->modalSubmitActionLabel('نعم، قبول')
                     ->modalCancelActionLabel('إلغاء')
                     ->visible(fn (TutoringRequest $record): bool => $record->status === ContentStatus::PENDING)
                     ->action(function (TutoringRequest $record): void {
-                        DB::transaction(function () use ($record) {
-                            $record->update(['status' => ContentStatus::APPROVED]);
-
-                            // Ensure Explanation is created (model boot() also handles this,
-                            // but firstOrCreate prevents duplicates if boot fires first)
-                            Explanation::firstOrCreate(
-                                [
-                                    'course_id' => $record->course_id,
-                                    'user_id'   => $record->student->user_id,
-                                ],
-                                [
-                                    'title'      => 'شرح: ' . ($record->course->name ?? 'مادة جديدة'),
-                                    'video_path' => $record->video_url,
-                                ]
-                            );
-                        });
+                        $record->update(['status' => ContentStatus::APPROVED]);
 
                         Notification::make()
                             ->title('✅ تم قبول الطلب')
-                            ->body("تم قبول طلب الشرح وإنشاء السجل تلقائياً.")
+                            ->body("تم قبول طلب الشرح بنجاح.")
                             ->success()
                             ->send();
                     }),

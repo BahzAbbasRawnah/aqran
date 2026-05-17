@@ -11,6 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Enums\ContentStatus;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 
 class WorkshopResource extends Resource
 {
@@ -185,6 +187,7 @@ class WorkshopResource extends Resource
                             ->send();
                     }),
 
+                Tables\Actions\ViewAction::make()->label('التفاصيل'),
                 Tables\Actions\EditAction::make()->label('تعديل'),
                 Tables\Actions\DeleteAction::make()->label('حذف'),
             ])
@@ -198,6 +201,64 @@ class WorkshopResource extends Resource
             ->emptyStateIcon('heroicon-o-presentation-chart-bar');
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('بيانات ورشة العمل')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('title')
+                            ->label('عنوان الورشة'),
+
+                        Infolists\Components\TextEntry::make('user.name')
+                            ->label('مقدم الورشة'),
+
+                        Infolists\Components\TextEntry::make('targetMajors.name')
+                            ->label('التخصصات المستهدفة')
+                            ->badge()
+                            ->color('success')
+                            ->default('عام للجميع'),
+
+                        Infolists\Components\TextEntry::make('status')
+                            ->label('الحالة')
+                            ->badge()
+                            ->color(fn (ContentStatus $state): string => $state->color())
+                            ->formatStateUsing(fn (ContentStatus $state): string => $state->label()),
+
+                        Infolists\Components\TextEntry::make('created_at')
+                            ->label('تاريخ الإضافة')
+                            ->dateTime('Y/m/d H:i'),
+
+                        Infolists\Components\TextEntry::make('reject_reason')
+                            ->label('سبب الرفض')
+                            ->visible(fn (Workshop $record): bool => $record->status === ContentStatus::REJECTED)
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
+                Infolists\Components\Section::make('الوصف والمحتوى المرفق')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('description')
+                            ->label('وصف الورشة')
+                            ->html()
+                            ->columnSpanFull(),
+
+                        Infolists\Components\ImageEntry::make('thumbnail_url')
+                            ->label('الصورة المصغرة')
+                            ->disk('public')
+                            ->height(180)
+                            ->width(320)
+                            ->placeholder('لا توجد صورة مصغرة')
+                            ->columnSpanFull(),
+
+                        Infolists\Components\ViewEntry::make('video_url')
+                            ->label('فيديو الورشة')
+                            ->view('filament.infolists.video-player')
+                            ->columnSpanFull()
+                            ->visible(fn (Workshop $record): bool => !empty($record->video_url)),
+                    ])->columns(1),
+            ]);
+    }
+
     public static function getRelations(): array { return []; }
 
     public static function getPages(): array
@@ -205,6 +266,7 @@ class WorkshopResource extends Resource
         return [
             'index'  => Pages\ListWorkshops::route('/'),
             'create' => Pages\CreateWorkshop::route('/create'),
+            'view'   => Pages\ViewWorkshop::route('/{record}'),
             'edit'   => Pages\EditWorkshop::route('/{record}/edit'),
         ];
     }

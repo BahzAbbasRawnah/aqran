@@ -82,8 +82,30 @@ class ScheduleController extends Controller
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule): ScheduleResource
     {
-        $schedule->update($request->validated());
-        return new ScheduleResource($schedule);
+        $validated = $request->validated();
+
+        $schedule = DB::transaction(function () use ($schedule, $validated) {
+            // Update parent schedule attributes if passed (semester, year)
+            $scheduleData = array_diff_key($validated, ['items' => 1]);
+            if (!empty($scheduleData)) {
+                $schedule->update($scheduleData);
+            }
+
+            // Sync items if passed
+            if (isset($validated['items']) && is_array($validated['items'])) {
+                // Delete previous schedule items cleanly to prevent orphaned records
+                $schedule->items()->delete();
+                
+                // Create new schedule items
+                foreach ($validated['items'] as $item) {
+                    $schedule->items()->create($item);
+                }
+            }
+
+            return $schedule;
+        });
+
+        return new ScheduleResource($schedule->load(['items.course']));
     }
 
     /**
@@ -91,7 +113,36 @@ class ScheduleController extends Controller
      */
     public function destroy(Schedule $schedule): Response
     {
-        $schedule->delete();
+        DB::transaction(function () use ($schedule) {
+            // Detach/delete all items cleanly prior to deleting the schedule
+            $schedule->items()->delete();
+            $schedule->delete();
+        });
+
         return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Reset/Delete the current student's active schedule directly.
+     */
+    public function resetMySchedule(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        $schedule = $user->student->schedules()->latest()->first();
+
+        if ($schedule) {
+            DB::transaction(function () use ($schedule) {
+                $schedule->items()->delete();
+                $schedule->delete();
+            });
+        }
+
+        return response()->json([
+            'message' => 'تم إعادة تعيين الجدول بنجاح للبدء من جديد'
+        ], 200);
     }
 }

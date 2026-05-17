@@ -11,6 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Enums\ContentStatus;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 
 class AnnouncementResource extends Resource
 {
@@ -175,6 +177,7 @@ class AnnouncementResource extends Resource
                             ->send();
                     }),
 
+                Tables\Actions\ViewAction::make()->label('التفاصيل'),
                 Tables\Actions\EditAction::make()->label('تعديل'),
                 Tables\Actions\DeleteAction::make()->label('حذف'),
             ])
@@ -188,6 +191,64 @@ class AnnouncementResource extends Resource
             ->emptyStateIcon('heroicon-o-megaphone');
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('بيانات الإعلان')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('title')
+                            ->label('عنوان الإعلان'),
+
+                        Infolists\Components\TextEntry::make('majors.name')
+                            ->label('التخصصات المستهدفة')
+                            ->badge()
+                            ->color('primary')
+                            ->default('عام'),
+
+                        Infolists\Components\TextEntry::make('status')
+                            ->label('الحالة')
+                            ->badge()
+                            ->color(fn (ContentStatus $state): string => $state->color())
+                            ->formatStateUsing(fn (ContentStatus $state): string => $state->label()),
+
+                        Infolists\Components\TextEntry::make('publish_date')
+                            ->label('تاريخ النشر')
+                            ->dateTime('Y/m/d H:i'),
+
+                        Infolists\Components\TextEntry::make('expires_at')
+                            ->label('تاريخ الانتهاء')
+                            ->dateTime('Y/m/d H:i')
+                            ->default('مفتوح (لا ينتهي)'),
+
+                        Infolists\Components\TextEntry::make('created_at')
+                            ->label('تاريخ الإنشاء')
+                            ->dateTime('Y/m/d H:i'),
+
+                        Infolists\Components\TextEntry::make('reject_reason')
+                            ->label('سبب الرفض')
+                            ->visible(fn (Announcement $record): bool => $record->status === ContentStatus::REJECTED)
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
+                Infolists\Components\Section::make('المحتوى والصور')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('content')
+                            ->label('المحتوى')
+                            ->html()
+                            ->columnSpanFull(),
+
+                        Infolists\Components\ImageEntry::make('image_url')
+                            ->label('صورة الإعلان')
+                            ->disk('public')
+                            ->height(180)
+                            ->width(320)
+                            ->placeholder('لا توجد صورة مرفقة')
+                            ->columnSpanFull(),
+                    ])->columns(1),
+            ]);
+    }
+
     public static function getRelations(): array { return []; }
 
     public static function getPages(): array
@@ -195,6 +256,7 @@ class AnnouncementResource extends Resource
         return [
             'index'  => Pages\ListAnnouncements::route('/'),
             'create' => Pages\CreateAnnouncement::route('/create'),
+            'view'   => Pages\ViewAnnouncement::route('/{record}'),
             'edit'   => Pages\EditAnnouncement::route('/{record}/edit'),
         ];
     }

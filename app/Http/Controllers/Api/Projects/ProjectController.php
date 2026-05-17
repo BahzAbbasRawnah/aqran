@@ -55,10 +55,25 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProjectRequest $request, Project $project): ProjectResource
+    public function update(UpdateProjectRequest $request, Project $project)
     {
+        $user = $request->user();
+
+        // Ensure the authenticated user is the leader/owner of the project
+        $isLeader = $project->members()
+            ->where('users.id', $user->id)
+            ->wherePivot('role', 'leader')
+            ->exists();
+
+        if (!$isLeader) {
+            return response()->json([
+                'message' => 'You are not authorized to update this project.'
+            ], 403);
+        }
+
         $project->update($request->validated());
-        return new ProjectResource($project);
+
+        return new ProjectResource($project->load(['members', 'files.uploader']));
     }
 
     /**

@@ -26,8 +26,21 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request): TaskResource
     {
-        $task = Task::create($request->validated());
-        return new TaskResource($task);
+        $validated = $request->validated();
+
+        $task = \DB::transaction(function () use ($validated) {
+            // Extract reminders to prevent database column matching issues
+            $taskData = array_diff_key($validated, ['reminders' => 1]);
+            $task = Task::create($taskData);
+
+            if (isset($validated['reminders']) && is_array($validated['reminders'])) {
+                $task->reminders()->createMany($validated['reminders']);
+            }
+
+            return $task;
+        });
+
+        return new TaskResource($task->load(['reminders']));
     }
 
     /**
@@ -43,8 +56,23 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task): TaskResource
     {
-        $task->update($request->validated());
-        return new TaskResource($task);
+        $validated = $request->validated();
+
+        $task = \DB::transaction(function () use ($task, $validated) {
+            // Extract reminders to prevent database column matching issues
+            $taskData = array_diff_key($validated, ['reminders' => 1]);
+            $task->update($taskData);
+
+            if (isset($validated['reminders']) && is_array($validated['reminders'])) {
+                // Delete existing reminders and sync with the new payload
+                $task->reminders()->delete();
+                $task->reminders()->createMany($validated['reminders']);
+            }
+
+            return $task;
+        });
+
+        return new TaskResource($task->load(['reminders']));
     }
 
     /**

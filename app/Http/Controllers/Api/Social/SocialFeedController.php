@@ -132,27 +132,37 @@ class SocialFeedController extends Controller
         return response()->json([
             'data' => $merged->map(function ($item) {
                 $type = $item->feed_type;
+                
+                $status = null;
+                if ($item->status !== null) {
+                    $status = $item->status instanceof \BackedEnum ? $item->status->value : $item->status;
+                }
+
                 if ($type === 'workshop') {
                     return [
                         'type' => 'workshop',
+                        'status' => $status,
                         'data' => new WorkshopResource($item),
                         'created_at' => $item->created_at,
                     ];
                 } elseif ($type === 'announcement') {
                     return [
                         'type' => 'announcement',
+                        'status' => $status,
                         'data' => new AnnouncementResource($item),
                         'created_at' => $item->created_at,
                     ];
                 } elseif ($type === 'community') {
                     return [
                         'type' => 'community',
+                        'status' => $status,
                         'data' => new CommunityResource($item),
                         'created_at' => $item->created_at,
                     ];
                 } else {
                     return [
                         'type' => 'tutoring_request',
+                        'status' => $status,
                         'data' => $item, // Raw tutoring request for now
                         'created_at' => $item->created_at,
                     ];

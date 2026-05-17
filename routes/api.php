@@ -101,5 +101,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // =====================================================================
     Route::apiResource('schedules', ScheduleController::class);
     Route::get('/my-schedule', [ScheduleController::class, 'mySchedule']);
+    Route::delete('/my-schedule', [ScheduleController::class, 'resetMySchedule']);
     Route::apiResource('schedule-items', ScheduleItemController::class);
 });

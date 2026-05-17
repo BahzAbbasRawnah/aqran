@@ -20,11 +20,11 @@ class TaskResource extends JsonResource
             'student_id' => $this->student_id,
             'title' => $this->title,
             'description' => $this->description,
-            'due_datetime' => $this->due_datetime,
+            'due_datetime' => $this->due_datetime ? $this->due_datetime->toIso8601String() : null,
             'is_completed' => (bool) $this->is_completed,
             'status_color' => $this->getStatusColor(),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
             
             // Relationships
             'reminders' => TaskReminderResource::collection($this->whenLoaded('reminders')),

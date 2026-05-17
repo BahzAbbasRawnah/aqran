@@ -25,6 +25,8 @@ class CommunityResource extends JsonResource
             'cover_image' => $this->cover_image,
             'member_count' => $this->members_count ?? $this->members()->count(),
             'is_joined' => $request->user() ? $this->members()->where('user_id', $request->user()->id)->exists() : false,
+            'status' => $this->status instanceof \BackedEnum ? $this->status->value : $this->status,
+            'reject_reason' => $this->reject_reason,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             

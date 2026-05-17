@@ -62,9 +62,30 @@ class ProjectFileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProjectFile $projectFile): Response
+    public function destroy(\Illuminate\Http\Request $request, ProjectFile $projectFile)
     {
+        $user = $request->user();
+
+        // 1. Authorize the user (must be uploader or project member)
+        $isUploader = $projectFile->user_id === $user->id;
+        $isMember = $projectFile->project && $projectFile->project->members()->where('users.id', $user->id)->exists();
+
+        if (!$isUploader && !$isMember) {
+            return response()->json([
+                'message' => 'You are not authorized to delete this file.'
+            ], 403);
+        }
+
+        // 2. Securely delete the physical file from storage
+        if ($projectFile->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($projectFile->file_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($projectFile->file_path);
+        }
+
+        // 3. Delete the ProjectFile record from the database
         $projectFile->delete();
-        return new Response(null, Response::HTTP_NO_CONTENT);
+
+        return response()->json([
+            'message' => 'File deleted successfully.'
+        ], 200);
     }
 }

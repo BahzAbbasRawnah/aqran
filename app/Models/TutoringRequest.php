@@ -31,21 +31,6 @@ class TutoringRequest extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::updated(function ($request) {
-            if ($request->wasChanged('status') && $request->status === \App\Enums\ContentStatus::APPROVED) {
-                Explanation::firstOrCreate(
-                    [
-                        'course_id' => $request->course_id,
-                        'user_id'   => $request->student->user_id,
-                    ],
-                    [
-                        'title'      => 'شرح: ' . ($request->course->name ?? 'مادة جديدة'),
-                        'video_path' => $request->video_url,
-                    ]
-                );
-            }
-        });
     }
 
     /**

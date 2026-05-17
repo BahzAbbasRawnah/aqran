@@ -27,6 +27,9 @@ class UpdateTaskRequest extends FormRequest
             'description' => 'sometimes|nullable|string',
             'due_datetime' => 'sometimes|date',
             'is_completed' => 'sometimes|boolean',
+            'reminders' => 'sometimes|array',
+            'reminders.*.reminder_type' => 'required_with:reminders|string|in:10_min,1_hour,1_day,3_days',
+            'reminders.*.is_sent' => 'sometimes|boolean',
         ];
     }
 }
