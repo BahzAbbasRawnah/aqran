@@ -25,6 +25,8 @@ class StoreCommunityRequest extends FormRequest
             'name' => 'required|string|max:255',
             'major_id' => 'nullable|exists:majors,id',
             'description' => 'nullable|string',
+            'category' => 'nullable|string|max:100',
+            'join_link' => 'nullable|url|max:500',
             'cover_image' => 'nullable|string|max:255',
             'member_count' => 'sometimes|integer|min:0',
         ];
